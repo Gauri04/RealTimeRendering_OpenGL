@@ -1,0 +1,12 @@
+com/example/perfragmentsphere/GLESMacros.java
+ com.example.perfragmentsphere.GLESMacros
+com/example/perfragmentsphere/Sphere.java
+ com.example.perfragmentsphere.Sphere
+com/example/perfragmentsphere/BuildConfig.java
+ com.example.perfragmentsphere.BuildConfig
+com/example/perfragmentsphere/GLESView.java
+ com.example.perfragmentsphere.GLESView
+com/example/perfragmentsphere/MainActivity.java
+ com.example.perfragmentsphere.MainActivity
+com/example/perfragmentsphere/Light.java
+ com.example.perfragmentsphere.Light
