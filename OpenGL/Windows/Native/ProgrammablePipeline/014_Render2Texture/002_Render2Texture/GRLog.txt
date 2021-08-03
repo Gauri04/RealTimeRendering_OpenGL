@@ -1,0 +1,8 @@
+Log file created successfully. 
+ Program started successfully
+ **** Logs ***** 
+
+ framebuffer status successful 36053
+ **** End ****
+Log File closed successfully. 
+ Program terminated successfully

@@ -1,0 +1,8 @@
+Log file created successfully. 
+ Program started successfully
+ **** Logs ***** 
+
+ test
+ **** End ****
+Log File closed successfully. 
+ Program terminated successfully
