@@ -1,0 +1,4 @@
+****Program started successfully****
+ in init, window set to centerin openglview initwithframe method
+ after setdelegate
+ Program terminated successfully

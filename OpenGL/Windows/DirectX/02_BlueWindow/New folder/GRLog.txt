@@ -1,0 +1,16 @@
+Log file created successfully. 
+ Program started successfully
+ **** Logs ***** 
+
+ Graphic card name : Intel(R) UHD Graphics
+ Graphic card VRAM : 134217728 bytes
+ VRAM in GB : 0
+ success in D3D11CreateDeviceAndSwapChain
+ Chosen driver type is : 	 D3D_DRIVER_TYPE_HARDWARE
+ Suppoerted hoghest feature level is : 	 D3D_FEATURE_LEVEL_11_0
+ succcess in CreateRenderTargetView
+ success in calling Resize
+ success in initialize
+ **** End ****
+Log File closed successfully. 
+ Program terminated successfully
