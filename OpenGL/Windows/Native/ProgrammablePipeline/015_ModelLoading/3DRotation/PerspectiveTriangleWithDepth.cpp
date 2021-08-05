@@ -1,5 +1,7 @@
 #include<windows.h>
 #include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
 #include<gl\glew.h> // glew.h must be included BEFORE gl.h
 #include<gl\GL.h>
 #include"vmath.h"
@@ -9,10 +11,13 @@ using namespace vmath;
 
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "opengl32.lib")
-
+#pragma warning(disable : 996)
 
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
+
+#define BUFFER_SIZE 256
+#define S_EQUAL 0
 #define NR_POINT_COORDS 3
 #define NR_TEXTURE_COORDS 2
 #define NR_NORMAL_COORDS 3
@@ -45,16 +50,39 @@ enum
 	GR_ATTRIBUTE_NORMAL
 };
 
-GLuint grgVbo_position_pyramid;
-GLuint grgVbo_color_pyramid;
+GLuint grgVboPosition;
+GLuint grgVboTexture;
+GLuint grgVboElement;
 GLuint grgMvpMatrixUniform;
 mat4 grgPerspectiveProjectionMatrix;
-GLuint grgVao_pyramid;								// we will create as many Vbo's as glBegins, glEnds (one vbo for one glBegin glEnd)
-GLuint grgVao_cube;
-GLuint grgVbo_position_cube;
-GLuint grgVbo_color_cube;
+GLuint grgVao;							
 GLfloat grgAnglePyramid = 0.0f;
 GLfloat grgAngleCube = 0.0f;
+
+typedef struct vec_2d_int
+{
+	GLint** pp_arr;
+	size_t size;
+}vec_2d_int_t;
+
+typedef struct vec_2d_float
+{
+	GLfloat** pp_arr;
+	size_t size;
+}vec_2d_float_t;
+
+vec_2d_float_t* gp_vertices;
+vec_2d_float_t* gp_texture;
+vec_2d_float_t* gp_normals;
+vec_2d_int_t* gp_face_tri;
+vec_2d_int_t* gp_face_texture;
+vec_2d_int_t* gp_face_normals;
+
+FILE* g_fp_meshFile = NULL;
+FILE* g_fp_logFile = NULL;
+char g_line[BUFFER_SIZE];
+GLuint grstone_texture;
+GLuint grgtextureSamplerUniform;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
 {
@@ -255,6 +283,8 @@ void Initialize()
 	// function declaration
 	void Resize(int, int);
 	void Uninitialize(void);
+	void LoadMeshData(void);
+	bool LoadGLTexture(GLuint*, TCHAR[]);
 	
 	//variable declarations
 	PIXELFORMATDESCRIPTOR grpfd;
@@ -325,13 +355,13 @@ void Initialize()
 		"#version 450 core" \
 		"\n" \
 		"in vec4 vPosition;" \
-		"in vec4 vColor;" \
+		"in vec2 vTexCoord;" \
 		"uniform mat4 u_mvpMatrix;" \
-		"out vec4 out_color;" \
+		"out vec2 out_texcoord;" \
 		"void main(void)" \
 		"{" \
 		"gl_Position = u_mvpMatrix * vPosition;" \
-		"out_color = vColor;" \
+		"out_texcoord = vTexCoord;" \
 		"}";
 	
 	glShaderSource(grgVertexShaderObject, 1, (const GLchar **) &grvertexShaderSourceCode, NULL);
@@ -368,11 +398,13 @@ void Initialize()
 	const GLchar* grfragmentShaderSourceCode =
 		"#version 450 core" \
 		"\n" \
-		"in vec4 out_color;"
+		"in vec2 out_texcoord;"
+		"uniform sampler2D u_texture_sampler;" \
 		"out vec4 FragColor;" \
 		"void main(void)" \
 		"{" \
-		"FragColor = out_color;" \
+		/*"FragColor = texture(u_texture_sampler, out_texcoord);" \*/
+		"FragColor = vec4(1.0, 1.0, 1.0, 1.0);" \
 		"}";
 
 	glShaderSource(grgFragmentShadeerObject, 1, (const GLchar **) &grfragmentShaderSourceCode, NULL);
@@ -410,7 +442,7 @@ void Initialize()
 
 	// pre-link our attribute enum with shader's attributes
 	glBindAttribLocation(grgShaderProgramObject, GR_ATTRIBUTE_POSITION, "vPosition");
-	glBindAttribLocation(grgShaderProgramObject, GR_ATTRIBUTE_COLOR, "vColor");
+	glBindAttribLocation(grgShaderProgramObject, GR_ATTRIBUTE_TEXCOORD, "vTexCoord");
 
 	// link shader
 	glLinkProgram(grgShaderProgramObject);
@@ -434,153 +466,76 @@ void Initialize()
 	}
 
 	grgMvpMatrixUniform = glGetUniformLocation(grgShaderProgramObject, "u_mvpMatrix");
-	const GLfloat grpyramidVertices[] =
+	grgtextureSamplerUniform = glGetUniformLocation(grgShaderProgramObject, "u_texture_sampler");
+
+	
+	LoadMeshData();
+	
+	GLfloat* vertices;
+	int index = 0;
+	int vi;
+	vertices = (GLfloat*)malloc(gp_face_tri->size * 9 * sizeof(GLfloat));
+	for (int i = 0; i != gp_face_tri->size; ++i)
 	{
-		0.0f, 1.0f, 0.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-								//right face
-		0.0f, 1.0f, 0.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, 1.0f,
-								// back face
-		0.0f, 1.0f, 0.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-								// left face
-		0.0f, 1.0f, 0.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f
-	};
-	const GLfloat grpyramidColors[] =
+		for (int j = 0; j != NR_TRIANGLE_VERTICES; j++)
+		{
+			
+			vi = gp_face_tri->pp_arr[i][j] - 1;
+			vertices[index + 0] = gp_vertices->pp_arr[vi][0];
+			vertices[index + 1] = gp_vertices->pp_arr[vi][1];
+			vertices[index + 2] = gp_vertices->pp_arr[vi][2];
+			fprintf(grgpFile, "\n vertices[%d] : %f \t vertices[%d] : %f \t vertices[%d] : %f", index + 0, vertices[index + 0],
+					index + 1, vertices[index + 1], index + 2, vertices[index + 2]);
+					
+			index = index + 3;
+		}
+		
+	}
+	GLfloat* textures = NULL;
+	index = 0;
+	textures = (GLfloat*)malloc(gp_face_texture->size * 9 * sizeof(GLfloat));
+	for (int i = 0; i != gp_face_texture->size; ++i)
 	{
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
+		for (int j = 0; j != NR_TEXTURE_COORDS; j++)
+		{
+			vi = gp_face_texture->pp_arr[i][j] - 1;
+			textures[index + 0] = gp_texture->pp_arr[vi][0];
+			textures[index + 1] = gp_texture->pp_arr[vi][1];
+		}
+		
+	}
+	
+	glGenVertexArrays(1, &grgVao);
+	glBindVertexArray(grgVao);
 
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f,
-
-		1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f,
-	};
-	const GLfloat grcubeVertices[] =
-	{
-											// front face
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-											// right face
-		1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f,
-											// back face
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-										    // left face
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f,
-											// top face
-		1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-											// bottom face
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f
-	};
-	const GLfloat grcubeColors[] =		
-	{
-		1.0f, 0.0f, 0.0f,					// one color for single surface 
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-
-		0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-
-		0.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f,
-
-		1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f,
-
-		1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-	};
-
-	glGenVertexArrays(1, &grgVao_pyramid);
-	glBindVertexArray(grgVao_pyramid);
-
-	glGenBuffers(1, &grgVbo_position_pyramid);
-	glBindBuffer(GL_ARRAY_BUFFER, grgVbo_position_pyramid);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(grpyramidVertices), grpyramidVertices, GL_STATIC_DRAW);
-
+	glGenBuffers(1, &grgVboPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, grgVboPosition);
+	glBufferData(GL_ARRAY_BUFFER, gp_face_tri->size * 9 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(GR_ATTRIBUTE_POSITION, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
 	glEnableVertexAttribArray(GR_ATTRIBUTE_POSITION);
-
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// color
-	glGenBuffers(1, &grgVbo_color_pyramid);
-	glBindBuffer(GL_ARRAY_BUFFER, grgVbo_color_pyramid);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(grpyramidColors), grpyramidColors, GL_STATIC_DRAW);
-	glVertexAttribPointer(GR_ATTRIBUTE_COLOR, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(GR_ATTRIBUTE_COLOR);
+	
+	glGenBuffers(1, &grgVboTexture);
+	glBindBuffer(GL_ARRAY_BUFFER, grgVboTexture);
+	glBufferData(GL_ARRAY_BUFFER, gp_face_texture->size * 9 * sizeof(GLfloat), textures, GL_STATIC_DRAW);
+	glVertexAttribPointer(GR_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(GR_ATTRIBUTE_TEXCOORD);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+	/*
+	glGenBuffers(1, &grgVboElement);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grgVboElement);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, gp_face_tri->size * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	*/
 	glBindVertexArray(0);
 
 
 
-	//** initialize vao_square **//
-	glGenVertexArrays(1, &grgVao_cube);
-	glBindVertexArray(grgVao_cube);
-
-	glGenBuffers(1, &grgVbo_position_cube);
-	glBindBuffer(GL_ARRAY_BUFFER, grgVbo_position_cube);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(grcubeVertices), grcubeVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(GR_ATTRIBUTE_POSITION, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(GR_ATTRIBUTE_POSITION);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// color for square
-	glGenBuffers(1, &grgVbo_position_cube);
-	glBindBuffer(GL_ARRAY_BUFFER, grgVbo_position_cube);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(grcubeColors), grcubeColors, GL_STATIC_DRAW);
-	glVertexAttribPointer(GR_ATTRIBUTE_COLOR, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(GR_ATTRIBUTE_COLOR);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindVertexArray(0);
+	free(vertices);
+	vertices = NULL;
+	free(textures);
+	textures = NULL;
+	
 
 	// Depth
 	glShadeModel(GL_SMOOTH);
@@ -589,6 +544,7 @@ void Initialize()
 	glDepthFunc(GL_LEQUAL);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+	LoadGLTexture(&grstone_texture, MAKEINTRESOURCE(GRTEXTURE));
 	// set clearcolor
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -596,6 +552,40 @@ void Initialize()
 	
 	// warm-up call to resize
 	Resize(WIN_WIDTH, WIN_HEIGHT);
+}
+
+bool LoadGLTexture(GLuint* texture, TCHAR resourceID[])
+{
+	// variable declarations
+	bool bResult = false;
+	HBITMAP hBitmap = NULL;
+	BITMAP bmp;
+
+	//code
+	// OS dependent code starts from here
+	hBitmap = (HBITMAP)LoadImage(GetModuleHandle(NULL), resourceID, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);		// cx and cy  is 0,0 for bitmap img, for icon, give width and height
+	if (hBitmap)
+	{
+		bResult = true;
+		GetObject(hBitmap, sizeof(bmp), &bmp);
+
+		// from here starts OpenGL actual code
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glGenTextures(1, texture);
+		glBindTexture(GL_TEXTURE_2D, *texture);
+		// setting of texture parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);		// MAG - Magnification
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);				// MIN - Minification
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bmp.bmWidth, bmp.bmHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, bmp.bmBits);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		DeleteObject(hBitmap);
+
+	}
+
+	return(bResult);
+
 }
 
 void Resize(int width, int height)
@@ -607,6 +597,120 @@ void Resize(int width, int height)
 
 	grgPerspectiveProjectionMatrix = vmath::perspective(45.0f, (GLfloat) width / (GLfloat) height, 0.1f, 100.0f);
 
+}
+
+void LoadMeshData()
+{
+	int lineCount = 0;
+	vec_2d_int_t* create_vec_2d_int(void);
+	vec_2d_float_t* create_vec_2d_float(void);
+
+	void push_back_vec_2d_int(vec_2d_int_t *, int *);
+	void push_back_vec_2d_float(vec_2d_float_t*, float*);
+	// wrapper for calloc
+	void* xcalloc(int, size_t);
+
+	if (fopen_s(&g_fp_meshFile, "monkey.obj", "r") != 0)
+	{
+		fprintf(grgpFile, "\n error while reading obj file");
+		DestroyWindow(grghwnd);
+	}
+	gp_vertices = create_vec_2d_float();
+	gp_texture = create_vec_2d_float();
+	gp_normals = create_vec_2d_float();
+	
+	gp_face_tri = create_vec_2d_int();
+	gp_face_texture = create_vec_2d_int();
+	gp_face_normals = create_vec_2d_int();
+
+	const char* sep_space = " ";
+	const char* sep_fslash = "/";
+	char* firstToken = NULL;
+	char* token = NULL;
+	char* faceTokens[NR_FACE_TOKENS];
+	int nrTokens;
+	char* tokenVertexIndex = NULL;
+	char* tokenTextureIndex = NULL;
+	char* tokenNormalIndex = NULL;
+
+	while (fgets(g_line, BUFFER_SIZE, g_fp_meshFile) != NULL)
+	{
+		firstToken = strtok(g_line, sep_space);
+
+		if (strcmp(firstToken, "v") == S_EQUAL)
+		{
+			GLfloat* pvec_point_coord = (GLfloat*)xcalloc(NR_POINT_COORDS, sizeof(GLfloat));
+			for (int i = 0; i != NR_POINT_COORDS; i++)
+			{
+				pvec_point_coord[i] = atof(strtok(NULL, sep_space));
+				
+			}
+			push_back_vec_2d_float(gp_vertices, pvec_point_coord);
+		}
+
+		else if (strcmp(firstToken, "vt") == S_EQUAL)
+		{
+			GLfloat* pvec_texture_coord = (GLfloat*)xcalloc(NR_TEXTURE_COORDS, sizeof(GLfloat));
+			for (int i = 0; i != NR_TEXTURE_COORDS; i++)
+			{
+				pvec_texture_coord[i] = atof(strtok(NULL, sep_space));
+			}
+			push_back_vec_2d_float(gp_texture, pvec_texture_coord);
+		}
+
+		else if (strcmp(firstToken, "vn") == S_EQUAL)
+		{
+			GLfloat* pvec_normal_coord = (GLfloat*)xcalloc(NR_NORMAL_COORDS, sizeof(GLfloat));
+			for (int i = 0; i != NR_NORMAL_COORDS; i++)
+			{
+				pvec_normal_coord[i] = atof(strtok(NULL, sep_space));
+			}
+			push_back_vec_2d_float(gp_normals, pvec_normal_coord);
+		}
+
+		else if (strcmp(firstToken, "f") == S_EQUAL)
+		{
+			GLint* pvecVertexIndices = (GLint*)xcalloc(3, sizeof(GLint));
+			GLint* pvecTextureIndices = (GLint*)xcalloc(3, sizeof(GLint));
+			GLint* pvecNormalIndices = (GLint*)xcalloc(3, sizeof(GLint));
+			memset((void*)faceTokens, 0, NR_FACE_TOKENS);
+
+			nrTokens = 0;
+			while (token = strtok(NULL, sep_space))
+			{
+				if (strlen(token) < 3)
+					break;
+				faceTokens[nrTokens] = token;
+				nrTokens++;
+			}
+		
+
+			for (int i = 0; i != NR_FACE_TOKENS; ++i)
+			{
+				tokenVertexIndex = strtok(faceTokens[i], sep_fslash);
+ 				tokenTextureIndex = strtok(NULL, sep_fslash);
+				tokenNormalIndex = strtok(NULL, sep_fslash);
+				int tokenIndex = atoi(tokenVertexIndex);
+				int textureIndex = atoi(tokenTextureIndex);
+				int normalIndex = atoi(tokenNormalIndex);
+				pvecVertexIndices[i] = tokenIndex;
+				pvecTextureIndices[i] = textureIndex;
+				pvecNormalIndices[i] = normalIndex;
+				
+			}
+			push_back_vec_2d_int(gp_face_tri, pvecVertexIndices);
+			push_back_vec_2d_int(gp_face_texture, pvecTextureIndices);
+			push_back_vec_2d_int(gp_face_normals, pvecNormalIndices);
+		}
+		
+		memset((void*)g_line, (int)'\0', BUFFER_SIZE);
+		
+		lineCount++;
+	}
+
+	fclose(g_fp_meshFile);
+	g_fp_meshFile = NULL;
+	
 }
 
 void Display(void)
@@ -629,47 +733,26 @@ void Display(void)
 
 	#pragma region pyramid
 	//////////////// Triangle //////////////
-	grtranslateMatrix = vmath::translate(-1.5f, 0.0f, -6.0f);
+	grtranslateMatrix = vmath::translate(0.0f, 0.0f, -6.0f);
 	grrotateMatrix = vmath::rotate(grgAnglePyramid, 0.0f, 1.0f, 0.0f);
 	grmodelViewMatrix = grtranslateMatrix * grrotateMatrix;
 
 	// multiply modelview and orthographic matrix to get modelviewprojectionmatrix
 	grmodelViewProjectionMatrix = grgPerspectiveProjectionMatrix * grmodelViewMatrix;
-
 	glUniformMatrix4fv(grgMvpMatrixUniform, 1, GL_FALSE, grmodelViewProjectionMatrix);
-
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, grstone_texture);
+	glUniform1i(grgtextureSamplerUniform, 0);
+	
 	// bind vao
-	glBindVertexArray(grgVao_pyramid);
-	glDrawArrays(GL_TRIANGLES, 0, 12);
-
-	// unbind vao
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBindVertexArray(grgVao);
+	glDrawArrays(GL_TRIANGLES, 0, gp_face_tri->size * 9);
 	glBindVertexArray(0);
 	#pragma endregion pyramid
 
 
-	#pragma region cube
-	grtranslateMatrix = mat4::identity();
-	grrotateMatrix = mat4::identity();
-	grmodelViewMatrix = mat4::identity();
-	grmodelViewProjectionMatrix = mat4::identity();
-
-	grtranslateMatrix = vmath::translate(1.5f, 0.0f, -6.0f);
-	grrotateMatrix = vmath::rotate(grgAngleCube, 1.0f, 0.0f, 0.0f);
-	grmodelViewMatrix = grtranslateMatrix * grrotateMatrix;
-	grmodelViewProjectionMatrix = grgPerspectiveProjectionMatrix * grmodelViewMatrix;
-
-	glUniformMatrix4fv(grgMvpMatrixUniform, 1, GL_FALSE, grmodelViewProjectionMatrix);
-	// bind vao of square
-	glBindVertexArray(grgVao_cube);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);												// In Programmable pipeline, there's no GL_QUADS, hence we have used GL_TRIANGLE_FAN
-	glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 16, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 20, 4);
-	// unbind vao
-	glBindVertexArray(0);
-	#pragma endregion cube 
 
 	// stop use of shader program
 	glUseProgram(0);
@@ -683,14 +766,91 @@ void Update(void)
 	grgAnglePyramid = grgAnglePyramid + 0.1f;
 	if (grgAnglePyramid >= 360.0f)
 		grgAnglePyramid = 0.0f;
+}
 
-	grgAngleCube = grgAngleCube + 0.1f;
-	if (grgAngleCube >= 360.0f)
-		grgAngleCube = 0.0f;
+vec_2d_int_t* create_vec_2d_int(void)
+{
+	void* xcalloc(int, size_t);
+
+	return((vec_2d_int_t*)xcalloc(1, sizeof(vec_2d_int_t)));
+}
+
+vec_2d_float_t *create_vec_2d_float(void)
+{	
+	void* xcalloc(int, size_t);
+
+	return((vec_2d_float_t*)xcalloc(1, sizeof(vec_2d_float_t)));
+}
+
+void push_back_vec_2d_int(vec_2d_int_t* pVec, GLint* pArr)
+{
+	void* xrealloc(void *, size_t);
+
+	pVec->pp_arr = (GLint**)xrealloc(pVec->pp_arr, (pVec->size + 1) * sizeof(int**));
+	pVec->size++;
+	pVec->pp_arr[pVec->size - 1] = pArr;
+}
+
+void push_back_vec_2d_float(vec_2d_float_t* pVec, GLfloat* pArr)
+{
+	void* xrealloc(void*, size_t);
+
+	pVec->pp_arr = (GLfloat**)xrealloc(pVec->pp_arr, (pVec->size + 1) * sizeof(GLfloat**));
+	pVec->size++;
+	pVec->pp_arr[pVec->size - 1] = pArr;
+}
+
+void clean_vec_2d_int(vec_2d_int_t** ppVec)
+{
+	vec_2d_int_t* pVec = *ppVec;
+	for (size_t i = 0; i != pVec->size; i++)
+	{
+		free(pVec->pp_arr[i]);
+	}
+	free(pVec->pp_arr);
+	free(pVec);
+	ppVec = NULL;
+}
+
+void clean_vec_2d_float(vec_2d_float_t** ppVec)
+{
+	vec_2d_float_t* pVec = *ppVec;
+	for (size_t i = 0; i != pVec->size; i++)
+	{
+		free(pVec->pp_arr[i]);
+	}
+	free(pVec);
+	ppVec = NULL;
+}
+
+void* xcalloc(int nrElements, size_t sizePerElement)
+{
+
+	void* p = calloc(nrElements, sizePerElement);
+	if (!p)
+	{
+		fprintf(grgpFile, "\n Error in xcalloc, calloc fatal memory error");
+		DestroyWindow(grghwnd);
+	}
+	return(p);
+}
+
+void* xrealloc(void* p, size_t newSize)
+{
+	void* ptr = realloc(p, newSize);
+	if (!ptr)
+	{
+		fprintf(grgpFile, "\n Error in xrealloc, realloc out of memory error");
+		DestroyWindow(grghwnd);
+	}
+	return(ptr);
 }
 
 void Uninitialize(void)
 {
+	void clean_vec_2d_float(vec_2d_float_t **ppVec);
+	void clean_vec_2d_int(vec_2d_int_t **ppVec);
+
 	//code
 	if(grgbFullScreen == true)
 	{
@@ -704,39 +864,20 @@ void Uninitialize(void)
 		
 	}
 	// delete triangle vao and vbo
-	if (grgVao_pyramid)
+	if (grgVao)
 	{
-		glDeleteVertexArrays(1, &grgVao_pyramid);
-		grgVao_pyramid = 0;
+		glDeleteVertexArrays(1, &grgVao);
+		grgVao = 0;
 	}
 
-	if (grgVbo_position_cube)
-	{
-		glDeleteBuffers(1, &grgVbo_position_cube);
-		grgVbo_position_cube = 0;
-	}
 
-	if (grgVbo_color_pyramid)
+	if (grgVboTexture)
 	{
-		glDeleteBuffers(1, &grgVbo_color_pyramid);
-		grgVbo_color_pyramid = 0;
+		glDeleteBuffers(1, &grgVboTexture);
+		grgVboTexture = 0;
 	}
 	// delete square vao and vbo
-	if (grgVao_cube)
-	{
-		glDeleteVertexArrays(1, &grgVao_cube);
-		grgVao_cube = 0;
-	}
-	if (grgVbo_position_cube)
-	{
-		glDeleteBuffers(1, &grgVbo_position_cube);
-		grgVbo_position_cube = 0;
-	}
-	if (grgVbo_color_cube)
-	{
-		glDeleteBuffers(1, &grgVbo_color_cube);
-		grgVbo_color_cube = 0;
-	}
+	
 
 	// free shader objects
 	// detach vertex shader
@@ -756,6 +897,13 @@ void Uninitialize(void)
 	// unlink shader program
 	glUseProgram(0);
 
+	clean_vec_2d_float(&gp_vertices);
+	clean_vec_2d_float(&gp_normals);
+	clean_vec_2d_float(&gp_texture);
+
+	clean_vec_2d_int(&gp_face_tri);
+	clean_vec_2d_int(&gp_face_texture);
+	clean_vec_2d_int(&gp_face_normals);
 
 	if(wglGetCurrentContext() == grghrc)
 	{

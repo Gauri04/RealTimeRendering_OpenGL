@@ -1,4 +1,3 @@
 #include"GRWindow.h"
 GRICON ICON "gricon.ico"
-
-
+GRTEXTURE BITMAP "Stone.bmp"

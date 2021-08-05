@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="gricon.ico" />
+    <Image Include="Stone.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GRWindow.h" />
