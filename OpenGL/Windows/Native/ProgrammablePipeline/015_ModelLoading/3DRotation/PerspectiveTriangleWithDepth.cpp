@@ -757,15 +757,13 @@ void Display(void)
 	// stop use of shader program
 	glUseProgram(0);
 
-	Update();
+	//Update();
 	SwapBuffers(grghdc);
 }
 
 void Update(void)
 {
-	grgAnglePyramid = grgAnglePyramid + 0.1f;
-	if (grgAnglePyramid >= 360.0f)
-		grgAnglePyramid = 0.0f;
+	// code
 }
 
 vec_2d_int_t* create_vec_2d_int(void)

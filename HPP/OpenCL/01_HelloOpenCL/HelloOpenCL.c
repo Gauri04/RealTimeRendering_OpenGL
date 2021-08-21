@@ -1,7 +1,10 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<OpenCL/OpenCL.h>
+#include<CL/OpenCL.h>
+
+#pragma comment(lib, "OpenCL.lib")
+
 
 cl_int ret_ocl;
 cl_platform_id oclPlatformID;
@@ -99,8 +102,9 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	const char* szOpenCLKernelPath = "VecAdd.cl";
-	oclProgram = clCreateProgramWithSource(oclContext, 1, &szOpenCLKernelPath, NULL, &ret_ocl);
+	cl_int status = 0;
+	oclSourceCode = loadOclProgramSource("VecAdd.cl", "", &sizeKernelCodeLength);
+	oclProgram = clCreateProgramWithSource(oclContext, 1, (const char **)&oclSourceCode, &sizeKernelCodeLength, &ret_ocl);
 	if (ret_ocl != CL_SUCCESS)
 	{
 		printf("\n OpenCL error - clCreateProgramWithSource failed, error code : %d. Exiting now ..", ret_ocl);
@@ -111,7 +115,7 @@ int main(void)
 	ret_ocl = clBuildProgram(oclProgram, 0, NULL, NULL, NULL, NULL);
 	if (ret_ocl != CL_SUCCESS)
 	{
-		printf("\n OpenCL error - clCreateProgramWithSource failed, error code : %d. Exiting now ..", ret_ocl);
+		printf("\n OpenCL error - clBuildProgram failed, error code : %d. Exiting now ..", ret_ocl);
 		size_t len;
 		char buffer[2048];
 		clGetProgramBuildInfo(oclProgram, oclComputeDeviceID, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
@@ -203,7 +207,7 @@ int main(void)
 
 	// run kernel
 	size_t global_size = 5;
-	ret_ocl = clEnqueNDRRangeKernel(oclCommandQueue, oclKernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);	// 1 in the param is for N-D, n = 1 i.e 1 dimension
+	ret_ocl = clEnqueueNDRangeKernel(oclCommandQueue, oclKernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);	// 1 in the param is for N-D, n = 1 i.e 1 dimension
 	if (ret_ocl != CL_SUCCESS)
 	{
 		printf("\n OpenCL error - clEnqueNDRRangeKernel() failed, error code : %d. Exiting now ..", ret_ocl);
@@ -212,7 +216,7 @@ int main(void)
 	}
 	clFinish(oclCommandQueue);
 
-	ret_ocl = clEnqueReadBuffer(oclCommandQueue, deviceOutput, CL_TRUE, 0, size, hostOutput, 0, NULL, NULL);
+	ret_ocl = clEnqueueReadBuffer(oclCommandQueue, deviceOutput, CL_TRUE, 0, size, hostOutput, 0, NULL, NULL);
 	if (ret_ocl != CL_SUCCESS)
 	{
 	printf("\n OpenCL error - clEnqueReadBuffer() failed, error code : %d. Exiting now ..", ret_ocl);
@@ -313,7 +317,7 @@ char* loadOclProgramSource(const char* filename, const char* preamble, size_t* s
 	// read code in buffer
 	char* sourceString = (char*)malloc(sizeSourceLength + sizePreambleLength + 1);
 	memcpy(sourceString, preamble, sizePreambleLength);
-	if (fread(sourceString) + sizePreambleLength, sizeSourceLength, 1, pFile) != 1)
+	if (fread((sourceString) + sizePreambleLength, sizeSourceLength, 1, pFile) != 1)
 	{
 		fclose(pFile);
 		free(sourceString);
@@ -330,6 +334,14 @@ char* loadOclProgramSource(const char* filename, const char* preamble, size_t* s
 
 	return(sourceString);
 }
+
+
+/* Compile and linking steps :
+cl.exe /c /EHsc /I "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include" HelloOpenCL.c /link "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\lib\x64\"
+link.exe HelloOpenCL.obj /LIBPATH:"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\lib\x64" /MACHINE:x64 /SUBSYSTEM:CONSOLE
+
+*/
+
 
 
 

@@ -1,0 +1,4 @@
+****Program started successfully****
+ in init, window set to center
+ framebuffer status successful 36053
+ Program terminated successfully

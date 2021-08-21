@@ -807,7 +807,7 @@ void Display(void)
 
 	// bind vao of square
 	glBindVertexArray(grgVao_cube);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);												// In Programmable pipeline, there's no GL_QUADS, hence we have used GL_TRIANGLE_FAN
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);											
 	glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
 	glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
 	glDrawArrays(GL_TRIANGLE_FAN, 12, 4);

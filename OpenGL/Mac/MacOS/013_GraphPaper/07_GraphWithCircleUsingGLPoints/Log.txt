@@ -1,0 +1,3 @@
+****Program started successfully****
+ in init, window set to center
+ Program terminated successfully

@@ -1,0 +1,8 @@
+com/example/graphtriangle/GLESMacros.java
+ com.example.graphtriangle.GLESMacros
+com/example/graphtriangle/BuildConfig.java
+ com.example.graphtriangle.BuildConfig
+com/example/graphtriangle/GLESView.java
+ com.example.graphtriangle.GLESView
+com/example/graphtriangle/MainActivity.java
+ com.example.graphtriangle.MainActivity

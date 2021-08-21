@@ -1,0 +1,5 @@
+****Program started successfully****
+ in init, window set to center
+ shereVertices[1] : -0.493844 	 sphereNormals[1] : -0.985081
+ numVertices : 382, numElements : 2280
+ Program terminated successfully

@@ -207,7 +207,7 @@ function init()
     gl.bindAttribLocation(grshaderProgramObject, WebGLMacros.GR_ATTRIBUTE_POSITION, "vPosition");
     // linking
     gl.linkProgram(grshaderProgramObject);
-    if(gl.getProgramParameter(grshaderProgramObject, gl.LINK_STATUS) == false);
+    if(gl.getProgramParameter(grshaderProgramObject, gl.LINK_STATUS) == false)
     {
         var err = gl.getProgramInfoLog(grshaderProgramObject);
         if(err.length > 0)
@@ -272,7 +272,7 @@ function resize()
     }
     else
     {
-        mat4.ortho(grorthographicProjectionMatrix, (-100.0 * (canvas.height / canvas.width)), (100 * (canvas.width / canvas.height)),
+        mat4.ortho(grorthographicProjectionMatrix, (-100.0 * (canvas.height / canvas.width)), (100 * (canvas.height / canvas.width)),
             -100.0, 100.0, -100.0, 100.0);
     }
 
