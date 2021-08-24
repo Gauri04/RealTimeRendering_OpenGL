@@ -38,6 +38,8 @@ ID3D11VertexShader* gpID3D11VertexShader = NULL;
 ID3D11PixelShader* gpID3D11PixelShader = NULL;
 ID3D11Buffer* gpID3D11Buffer_VertexBuffer_Position = NULL;
 ID3D11Buffer* gpID3D11Buffer_VertexBuffer_Color = NULL;
+ID3D11Buffer* gpiD3D11Buffer_VertexBuffer_PositionTriangle = NULL;
+ID3D11Buffer* gpiD3D11Buffer_VertexBuffer_ColorTriangle = NULL;
 ID3D11InputLayout* gpID3D11InputLayout = NULL;
 ID3D11Buffer* gpID3D11Buffer_ConstantBuffer = NULL;
 
