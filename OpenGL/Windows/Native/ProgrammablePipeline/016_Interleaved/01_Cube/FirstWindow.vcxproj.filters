@@ -26,6 +26,9 @@
     <Image Include="Kundali.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="marble.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GRWindow.h">

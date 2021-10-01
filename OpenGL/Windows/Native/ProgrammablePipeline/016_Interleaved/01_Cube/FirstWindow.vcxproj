@@ -149,6 +149,7 @@
   <ItemGroup>
     <Image Include="gricon.ico" />
     <Image Include="Kundali.bmp" />
+    <Image Include="marble.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GRWindow.h" />

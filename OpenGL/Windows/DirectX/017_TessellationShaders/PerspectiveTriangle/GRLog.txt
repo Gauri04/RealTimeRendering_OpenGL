@@ -1,0 +1,32 @@
+Log file created successfully. 
+ Program started successfully
+ **** Logs ***** 
+
+ Graphic card name : NVIDIA GeForce GTX 1650
+ Graphic card VRAM : 3221225472 bytes
+ VRAM in GB : 3
+ Success in D3D11CreateDeviceAndSwapChain
+ Chosen driver type is : 	 D3D_DRIVER_TYPE_HARDWARE
+ Suppoerted hoghest feature level is : 	 D3D_FEATURE_LEVEL_11_0
+ D3DCompile() succeeded for vertex shader
+ ID3D11Device::CreateVertexShader() succeeded
+ D3DCompile() succeeded for hull shader
+ ID3D11Device::CreateHullShader() succeeded
+ D3DCompile() succeeded for domain shader
+ ID3D11Device::CreateDomainShader() succeeded
+ D3DCompile() succeeded for vertex shader
+ ID3D11Device::CreatePixelShader() succeeded
+ ID3D11Device::CreateInputLayout() succeeded
+ ID3D11Device::CreateBuffer() succeeded for vertex buffer - position vertices
+ ID3D11Device::CreateBuffer() succeeded for constant buffer - hull shader
+ ID3D11Device::CreateBuffer() succeeded for constant buffer - domain shader
+ ID3D11Device::CreateBuffer() succeeded for constant buffer - pixel shader
+ success in CreateRasterizerState
+ succcess in CreateRenderTargetView
+ succcess in CreateTexture2D for depth buffer
+ succcess in CreateDepthStencilView for depth stencil view buffer
+ success in calling Resize
+ success in initialize
+ **** End ****
+Log File closed successfully. 
+ Program terminated successfully

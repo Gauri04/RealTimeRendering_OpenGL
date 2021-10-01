@@ -24,21 +24,6 @@ Log file created successfully.
  succcess in CreateDepthStencilView for depth stencil view buffer
  success in calling Resize
  success in initialize
- succcess in CreateRenderTargetView
- succcess in CreateTexture2D for depth buffer
- succcess in CreateDepthStencilView for depth stencil view buffer
- succcess in CreateRenderTargetView
- succcess in CreateTexture2D for depth buffer
- succcess in CreateDepthStencilView for depth stencil view buffer
- succcess in CreateRenderTargetView
- succcess in CreateTexture2D for depth buffer
- succcess in CreateDepthStencilView for depth stencil view buffer
- succcess in CreateRenderTargetView
- succcess in CreateTexture2D for depth buffer
- succcess in CreateDepthStencilView for depth stencil view buffer
- succcess in CreateRenderTargetView
- succcess in CreateTexture2D for depth buffer
- succcess in CreateDepthStencilView for depth stencil view buffer
  **** End ****
 Log File closed successfully. 
  Program terminated successfully
