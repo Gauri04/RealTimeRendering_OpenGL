@@ -659,9 +659,9 @@ HRESULT Initialize()
 
 	float colors[] =	// r-g-b color
 	{
-		1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
 	};
 	float verticesSquare[] =											
 	{
@@ -672,10 +672,10 @@ HRESULT Initialize()
 	};
 	float colorsSquare[] =
 	{
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
 	};
 
 	// Initialize buffer description structure and create vertex buffer

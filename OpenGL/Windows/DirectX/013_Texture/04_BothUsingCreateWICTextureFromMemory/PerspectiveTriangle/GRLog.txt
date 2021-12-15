@@ -19,3 +19,20 @@ Log file created successfully.
  ID3D11Device::CreateBuffer() succeeded for vertex buffer - position square
  ID3D11Device::CreateBuffer() succeeded for vertex buffer - texcoord square
  success in CreateRasterizerState
+ success CreateWICTextureFromFile
+ success in LoadD3DTexture
+ success CreateWICTextureFromFile
+ success in LoadD3DTexture
+ success in CreateSamplerState for texture
+ success in CreateSamplerState for texture
+ succcess in CreateRenderTargetView
+ succcess in CreateTexture2D for depth buffer
+ succcess in CreateDepthStencilView for depth stencil view buffer
+ success in calling Resize
+ success in initialize
+ succcess in CreateRenderTargetView
+ succcess in CreateTexture2D for depth buffer
+ succcess in CreateDepthStencilView for depth stencil view buffer
+ **** End ****
+Log File closed successfully. 
+ Program terminated successfully

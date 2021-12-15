@@ -1,0 +1,5 @@
+#pragma once
+#define GRICON 1001
+#define GRTEXTURE_STONE 1002
+#define GRTEXTURE_KUNDALI 1003
+

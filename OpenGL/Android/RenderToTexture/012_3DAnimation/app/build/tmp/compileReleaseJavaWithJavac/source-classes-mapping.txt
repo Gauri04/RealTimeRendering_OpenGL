@@ -1,0 +1,8 @@
+com/example/threedshapesanimation/BuildConfig.java
+ com.example.threedshapesanimation.BuildConfig
+com/example/threedshapesanimation/GLESView.java
+ com.example.threedshapesanimation.GLESView
+com/example/threedshapesanimation/GLESMacros.java
+ com.example.threedshapesanimation.GLESMacros
+com/example/threedshapesanimation/MainActivity.java
+ com.example.threedshapesanimation.MainActivity

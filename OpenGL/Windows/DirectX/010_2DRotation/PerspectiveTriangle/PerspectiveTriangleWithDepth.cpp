@@ -913,7 +913,7 @@ void Display(void)
 
 void Update()
 {
-	angle = angle + 0.01f;
+	angle = angle + 0.001f;
 	if (angle >= 360.0f)
 	{
 		angle = 0.0f;

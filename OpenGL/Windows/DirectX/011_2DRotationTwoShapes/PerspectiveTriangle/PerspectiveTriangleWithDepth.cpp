@@ -334,6 +334,7 @@ HRESULT D3DInfo()
 		fprintf(grgpFile, "\n VRAM in GB : %d", (int)(ceil((dxgiAdapterDesc.DedicatedVideoMemory) / 1024 / 1024 / 1024)));
 		fclose(grgpFile);
 	}
+	return(hr);
 	
 }
 
@@ -1017,7 +1018,7 @@ void Display(void)
 
 void Update()
 {
-	angle = angle + 0.01f;
+	angle = angle + 0.001f;
 	if (angle >= 360.0f)
 	{
 		angle = 0.0f;

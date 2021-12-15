@@ -21,6 +21,7 @@ Log file created successfully.
  succcess in CreateRenderTargetView
  success in calling Resize
  success in initialize
+ succcess in CreateRenderTargetView
  **** End ****
 Log File closed successfully. 
  Program terminated successfully
