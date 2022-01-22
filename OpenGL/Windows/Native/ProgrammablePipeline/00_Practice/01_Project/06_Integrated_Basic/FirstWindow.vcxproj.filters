@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PerspectiveTriangleWithDepth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GRRoad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GRStack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GRGrassQuad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GRGrass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GRTrees.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GRSky.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GRTerrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="gricon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="dirt.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="grassFlowers.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="grassy2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="hill.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="road.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="blendMap3.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="terrainGen2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="blendMap4.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="footpathnor.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="footpathtex.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="roadnor.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="roadtex.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="soil.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="farmGrass.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="farmSoil.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="farmMap.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="soilTexture.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="grass_d.dds" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GRWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vmath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ktx_loading_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VboData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRRoad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRGrassQuad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="filesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRGrass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRSky.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GRTerrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GRWindow.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="terragen1.ktx" />
+    <None Include="terragen_color.ktx" />
+    <None Include="FreeImage.dll" />
+    <None Include="assimp-vc141-mtd.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Sphere.lib" />
+    <Library Include="STB_IMAGE.lib" />
+    <Library Include="FreeImage.lib" />
+    <Library Include="assimp-vc141-mtd.lib" />
+  </ItemGroup>
+</Project>

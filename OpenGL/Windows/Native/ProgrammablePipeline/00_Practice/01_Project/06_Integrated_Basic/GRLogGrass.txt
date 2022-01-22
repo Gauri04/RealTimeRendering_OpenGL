@@ -1,0 +1,7 @@
+Log file created successfully. 
+ Program started successfully
+ **** Logs ***** 
+
+iRows : 256
+
+iCols : 256

@@ -1,0 +1,23 @@
+#include"GRWindow.h"
+GRICON ICON "gricon.ico"
+GRTERRAIN_COLOR BITMAP "hill.bmp"
+GRTERRAIN_GEN BITMAP "terrainGen2.bmp"
+GRTERRAIN_BLENDMAP BITMAP "blendMap4.bmp"
+GRTERRAIN_GRASS BITMAP "grassy2.bmp"
+GRTERRAIN_DIRT BITMAP "dirt.bmp"
+GRTERRAIN_GRSSSFLOWERS BITMAP "grassFlowers.bmp"
+
+// road
+GRTERRAIN_PATH BITMAP "road.bmp"
+GRBRICK_TEXTURE BITMAP "roadtex.bmp"
+GRBRICK_NORMAL BITMAP "roadnor.bmp"
+GRTEXTURE_FOOTPATH BITMAP "footpathnor.bmp"
+GRTEXTURE_NORMAL_FOOTPATH BITMAP "footpathtex.bmp"
+
+
+//grass quad
+GRTEXTURE_GRASSQUAD BITMAP "farmSoil.bmp"
+
+
+
+
